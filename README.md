@@ -1,16 +1,59 @@
-# React + Vite
+# AIテレアポ Editor
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+AI電話営業（テレアポ）の応答パターンを管理・編集するためのツールです。
 
-Currently, two official plugins are available:
+## 機能
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **応答パターン管理** - 電話応答パターンの作成・編集・削除
+- **正規表現パターン** - 日本語テキストマッチング用の正規表現パターン設定
+- **JSON インポート/エクスポート** - パターンデータのインポート・エクスポート
+- **CSVログ分析** - 通話ログの解析・頻出ワード分析
+- **パターンタイプ分類** - 応答/引継ぎ/終了などのタイプ別管理
 
-## React Compiler
+## パターンデータ構造
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+各パターンには以下の情報が含まれます：
 
-## Expanding the ESLint configuration
+- `japanese_reply` - 日本語の応答名
+- `english_translation` - 英語翻訳
+- `basis_of_decision` - 判定基準の説明
+- `patterns` - マッチング用正規表現パターン
+- `type` - パターンタイプ（transferCall, endCall など）
+- `audio_path_female/male` - 音声ファイルパス
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 技術スタック
+
+- **React** 19.x
+- **Vite** 7.x
+- **Tailwind CSS** 4.x
+
+## セットアップ
+
+### 必要環境
+
+- Node.js 18.x 以上
+- npm
+
+### インストール
+
+```bash
+npm install
+```
+
+### 開発サーバーの起動
+
+```bash
+npm run dev
+```
+
+### ビルド
+
+```bash
+npm run build
+```
+
+### プレビュー
+
+```bash
+npm run preview
+```
