@@ -121,6 +121,11 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
     </svg>
   ),
+  Users: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  ),
   FileText: () => (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -292,7 +297,10 @@ export default function AITeleapoEditor() {
     
     // 頻出ワード分析（ID:35のログ対象）
     const frequentWords = analyzeFrequentWords(id35Logs);
-    
+
+    // 会話ターン数分析
+    const conversationAnalysis = analyzeConversations(logs);
+
     return {
       total,
       firstUtteranceCount: firstUtteranceLogs.length,
@@ -304,7 +312,8 @@ export default function AITeleapoEditor() {
       firstUtteranceLogs,
       matchedLogs,
       endCallLogs,
-      id35Logs
+      id35Logs,
+      conversationAnalysis
     };
   }, [logs]);
   
@@ -965,7 +974,57 @@ export default function AITeleapoEditor() {
                             <p className="text-xs text-rose-400 mt-1">要確認：相槌で終話の可能性</p>
                           </div>
                         </div>
-                        
+
+                        {/* 会話ターン数分析 */}
+                        {logAnalysis.conversationAnalysis?.available && (
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-2xl border border-purple-500/30 p-5">
+                              <div className="flex items-center gap-3 mb-2">
+                                <div className="p-2 bg-purple-500/20 rounded-lg">
+                                  <Icons.Users />
+                                </div>
+                                <span className="text-slate-400 text-sm">総会話数</span>
+                              </div>
+                              <p className="text-3xl font-bold text-purple-300">
+                                {logAnalysis.conversationAnalysis.totalConversations}
+                              </p>
+                              <p className="text-xs text-slate-500 mt-1">ユニークな通話セッション</p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-blue-600/20 to-cyan-600/20 rounded-2xl border border-blue-500/30 p-5">
+                              <div className="flex items-center gap-3 mb-2">
+                                <div className="p-2 bg-blue-500/20 rounded-lg">
+                                  <Icons.TrendingUp />
+                                </div>
+                                <span className="text-slate-400 text-sm">平均ターン数</span>
+                              </div>
+                              <p className="text-3xl font-bold text-blue-300">
+                                {logAnalysis.conversationAnalysis.avgTurns}
+                              </p>
+                              <p className="text-xs text-slate-500 mt-1">
+                                中央値: {logAnalysis.conversationAnalysis.medianTurns} /
+                                最大: {logAnalysis.conversationAnalysis.maxTurns}
+                              </p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-amber-600/20 to-orange-600/20 rounded-2xl border border-amber-500/30 p-5">
+                              <div className="flex items-center gap-3 mb-2">
+                                <div className="p-2 bg-amber-500/20 rounded-lg">
+                                  <Icons.AlertCircle />
+                                </div>
+                                <span className="text-slate-400 text-sm">初回離脱率</span>
+                              </div>
+                              <p className="text-3xl font-bold text-amber-300">
+                                {((logAnalysis.conversationAnalysis.oneTurnConversations.length /
+                                   logAnalysis.conversationAnalysis.totalConversations) * 100).toFixed(1)}%
+                              </p>
+                              <p className="text-xs text-slate-500 mt-1">
+                                {logAnalysis.conversationAnalysis.oneTurnConversations.length}件が1ターンで終了
+                              </p>
+                            </div>
+                          </div>
+                        )}
+
                         {/* 説明 */}
                         <div className="bg-slate-800/30 rounded-xl border border-slate-700/50 p-4">
                           <h4 className="font-medium text-slate-300 flex items-center gap-2 mb-2">
