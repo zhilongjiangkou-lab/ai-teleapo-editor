@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { analyzeConversations } from './conversationAnalysis';
 
 // サンプルパターンデータ（初期テンプレート）
 const TEMPLATE_PATTERNS = [

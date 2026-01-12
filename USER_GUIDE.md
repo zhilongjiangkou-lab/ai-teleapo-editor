@@ -165,9 +165,10 @@ CloudWatch Logsからエクスポートした通話ログを分析し、誤終�
 ```
 fields @timestamp
 | filter @message like /returnObj/
+| parse @message /contactId:\s*'(?<contactId>[^']*)'/
 | parse @message /transcript:\s*'(?<transcript_text>[^']*)'/
 | parse @message /selectedId:\s*(?<selectedId>[^,\s}]+)/
-| display @timestamp, transcript_text, selectedId
+| display @timestamp, contactId, transcript_text, selectedId
 | sort @timestamp desc
 | limit 2000
 ```
@@ -182,15 +183,22 @@ fields @timestamp
 
 **CSVに含まれるカラム:**
 - `@timestamp`: タイムスタンプ
+- `contactId`: 通話ID（会話のグループ化に使用）
 - `transcript_text`: 発話テキスト
 - `selectedId`: マッチしたパターンID
 
 ### 分析ダッシュボード
 
-#### 統計情報
+#### 基本統計
 - **最初の発話**: undefinedは仕様通り（正常）
 - **2回目以降（マッチ済）**: パターンマッチング対象
 - **ID:35（誤終話リスク）**: 要確認
+
+#### 会話ターン数分析（contactId必須）
+- **総会話数**: ユニークな通話セッション数
+- **平均ターン数**: 1通話あたりの平均発話回数
+- **中央値・最大値**: ターン数の分布
+- **初回離脱率**: 1ターンで終了した会話の割合
 
 #### ID:35について
 - ID:35は「判別不能」パターンで `type: endCall`
