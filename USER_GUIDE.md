@@ -156,14 +156,34 @@ CloudWatch Logsからエクスポートした通話ログを分析し、誤終�
 
 ### ログのインポート
 
+#### CloudWatch Logs Insightsでのデータ抽出
+
+1. **AWSコンソール** → **CloudWatch** → **Logs Insights**にアクセス
+2. 対象のロググループを選択
+3. 以下のクエリを実行：
+
+```
+fields @timestamp
+| filter @message like /returnObj/
+| parse @message /transcript:\s*'(?<transcript_text>[^']*)'/
+| parse @message /selectedId:\s*(?<selectedId>[^,\s}]+)/
+| display @timestamp, transcript_text, selectedId
+| sort @timestamp desc
+| limit 2000
+```
+
+4. **「Export results to CSV」** をクリックしてCSVをダウンロード
+
+#### エディタへのインポート
+
 1. 「誤終話分析」タブを選択
 2. 「CSVをインポート」ボタンをクリック
-3. CloudWatch LogsからエクスポートしたCSVファイルを選択
+3. ダウンロードしたCSVファイルを選択
 
-**必要なCSV形式:**
+**CSVに含まれるカラム:**
+- `@timestamp`: タイムスタンプ
 - `transcript_text`: 発話テキスト
 - `selectedId`: マッチしたパターンID
-- `@timestamp`: タイムスタンプ
 
 ### 分析ダッシュボード
 
