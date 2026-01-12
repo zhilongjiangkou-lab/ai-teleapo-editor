@@ -154,15 +154,12 @@ const getTypeBadge = (type) => {
   }
 };
 
-// CSVパース関数（改善版：BOM対応、空行スキップ）
+// CSVパース関数
 const parseCSV = (text) => {
-  // BOM（Byte Order Mark）を除去
-  text = text.replace(/^\uFEFF/, '');
-
   const lines = text.split('\n');
   const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
   const data = [];
-
+  
   for (let i = 1; i < lines.length; i++) {
     if (!lines[i].trim()) continue;
     const values = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
@@ -170,10 +167,6 @@ const parseCSV = (text) => {
     headers.forEach((header, j) => {
       row[header] = values[j] ? values[j].replace(/"/g, '').trim() : '';
     });
-
-    // transcript_textが空の行はスキップ
-    if (!row.transcript_text || row.transcript_text === '') continue;
-
     data.push(row);
   }
   return data;
