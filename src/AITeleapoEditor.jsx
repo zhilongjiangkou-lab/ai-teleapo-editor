@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { analyzeConversations } from './conversationAnalysis';
+import { analyzeEarlyExit, detectInappropriateResponses } from './earlyExitAnalysis';
+import { ConversationFlowChart } from './ConversationFlow';
+import { ConversationTreeFlow } from './ConversationTreeFlow';
 
 // サンプルパターンデータ（初期テンプレート）
 const TEMPLATE_PATTERNS = [
@@ -207,6 +210,8 @@ export default function AITeleapoEditor() {
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
   const [editingPattern, setEditingPattern] = useState(null);
   const [testText, setTestText] = useState('');
+  const [exitAnalysisTab, setExitAnalysisTab] = useState('flow');
+  const [flowViewMode, setFlowViewMode] = useState('bar');
   const [activeTab, setActiveTab] = useState('patterns');
   const [searchQuery, setSearchQuery] = useState('');
   const [newCustomerName, setNewCustomerName] = useState('');
@@ -301,6 +306,12 @@ export default function AITeleapoEditor() {
     // 会話ターン数分析
     const conversationAnalysis = analyzeConversations(logs);
 
+    // 早期離脱分析
+    const earlyExitAnalysis = analyzeEarlyExit(logs, conversationAnalysis);
+
+    // 不適切応答の検出
+    const inappropriateResponses = detectInappropriateResponses(logs, patterns);
+
     return {
       total,
       firstUtteranceCount: firstUtteranceLogs.length,
@@ -313,7 +324,9 @@ export default function AITeleapoEditor() {
       matchedLogs,
       endCallLogs,
       id35Logs,
-      conversationAnalysis
+      conversationAnalysis,
+      earlyExitAnalysis,
+      inappropriateResponses
     };
   }, [logs]);
   
@@ -729,7 +742,8 @@ export default function AITeleapoEditor() {
                   {[
                     { id: 'patterns', label: 'パターン一覧', icon: Icons.Edit },
                     { id: 'test', label: 'マッチングテスト', icon: Icons.Play },
-                    { id: 'logs', label: '誤終話分析', icon: Icons.PhoneOff }
+                    { id: 'logs', label: '誤終話分析', icon: Icons.PhoneOff },
+                    { id: 'exit-analysis', label: '早期離脱分析', icon: Icons.TrendingUp }
                   ].map(tab => (
                     <button
                       key={tab.id}
@@ -1160,6 +1174,66 @@ export default function AITeleapoEditor() {
                     )}
                   </div>
                 )}
+
+                {activeTab === 'exit-analysis' && logAnalysis.earlyExitAnalysis?.available && (
+                  <div className="space-y-6">
+
+                    {/* 会話フロー */}
+                      <div className="bg-slate-900/50 rounded-2xl border border-slate-700/50 p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-2">
+                            <Icons.TrendingUp />
+                            <h3 className="text-lg font-semibold">会話フロー図</h3>
+                          </div>
+
+                          {/* 表示切替ボタン */}
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setFlowViewMode('bar')}
+                              className={`px-4 py-2 rounded-lg text-sm transition-all ${
+                                flowViewMode === 'bar'
+                                  ? 'bg-cyan-600 text-white'
+                                  : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                              }`}
+                            >
+                              バーチャート
+                            </button>
+                            <button
+                              onClick={() => setFlowViewMode('tree')}
+                              className={`px-4 py-2 rounded-lg text-sm transition-all ${
+                                flowViewMode === 'tree'
+                                  ? 'bg-cyan-600 text-white'
+                                  : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                              }`}
+                            >
+                              ツリー図
+                            </button>
+                          </div>
+                        </div>
+
+                        <p className="text-sm text-slate-400 mb-6">
+                          {flowViewMode === 'bar'
+                            ? '左から右への流れで、パターンIDがどのように遷移しているかを可視化'
+                            : '階層的なツリー構造で会話の分岐を可視化'}
+                        </p>
+
+                        {flowViewMode === 'bar' ? (
+                          <ConversationFlowChart
+                            flowByPattern={logAnalysis.earlyExitAnalysis.flowByPattern}
+                            patterns={patterns}
+                            Icons={Icons}
+                          />
+                        ) : (
+                          <ConversationTreeFlow
+                            flowByPattern={logAnalysis.earlyExitAnalysis.flowByPattern}
+                            patterns={patterns}
+                            Icons={Icons}
+                          />
+                        )}
+                      </div>
+                  </div>
+                )}
+
               </>
             )}
           </main>
